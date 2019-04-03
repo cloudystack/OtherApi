@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Demo.OtherApi.BusinessLogic.Core\Demo.OtherApi.BusinessLogic.Core.csproj" />
+    <ProjectReference Include="..\Demo.OtherApi.DataAccess.Core\Demo.OtherApi.DataAccess.Core.csproj" />
+  </ItemGroup>
+
+</Project>

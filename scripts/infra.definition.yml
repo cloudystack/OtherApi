@@ -1,0 +1,133 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >-
+  An AWS Serverless Application that uses the ASP.NET Core framework running in Amazon Lambda and DynamoDB Table for project Demo and service OtherApi.
+Parameters:
+  BucketName:
+    Type: String
+    Description: BucketName
+  CodeKey:
+    Type: String
+    Description: CodeKey
+  WorkEnvironment:
+    Type: String
+    Description: WorkEnvironment
+  WorkFeature:
+    Type: String
+    Description: WorkFeature
+  FunctionMemorySize:
+    Type: Number
+    Description: FunctionMemorySize
+  FunctionTimeout:
+    Type: Number
+    Description: FunctionTimeout
+  ReadCapacityUnit:
+    Type: Number
+    Description: ReadCapacityUnit
+  WriteCapacityUnit:
+    Type: Number
+    Description: WriteCapacityUnit
+  AccessKey:
+    Type: String
+    Description: AccessKey
+  SecretKey:
+    Type: String
+    Description: SecretKey
+  RegionKey:
+    Type: String
+    Description: RegionKey
+Resources:
+  ProxyPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ProxyFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub >-
+        arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ProxyApi}/*/*/*
+  ProxyApi: 
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          version: 1.0.0
+          title: !Sub >- 
+            ${AWS::StackName}
+        basePath: /Prod
+        schemes:
+          - https
+        paths:
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              response: {}
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                passthroughBehavior: when_no_match
+                type: aws_proxy
+                uri: !Sub >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProxyFunction}/invocations
+        x-amazon-apigateway-binary-media-types:
+          - '*/*'
+  ProxyFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri:
+        Bucket: !Ref BucketName
+        Key: !Ref CodeKey
+      Handler: >-
+        Demo.OtherApi.Presentation::Demo.OtherApi.Presentation.LambdaEntryPoint::FunctionHandlerAsync
+      Runtime: dotnetcore2.1
+      MemorySize: !Ref FunctionMemorySize
+      Timeout: !Ref FunctionTimeout
+      Role: null
+      Policies:
+        - AWSLambdaFullAccess
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: !Ref WorkEnvironment
+          ASPNETCORE_FEATURE: !Ref WorkFeature
+          AWSSetting__AccessKey: !Ref AccessKey
+          AWSSetting__SecretKey: !Ref SecretKey
+          AWSSetting__Region: !Ref RegionKey
+          Stage: /Prod
+      Events:
+        ProxyResource:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ProxyApi
+            Path: '/{proxy+}'
+            Method: ANY
+  AppSettingTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: !Join 
+            - ''
+            - - !Ref WorkEnvironment
+              - _
+              - !Ref WorkFeature
+              - _
+              - DemoOtherApiAppSetting
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref ReadCapacityUnit
+        WriteCapacityUnits: !Ref WriteCapacityUnit
+Outputs:
+  ServiceUrl:
+    Description: Service URL 
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !Ref ProxyApi
+        - .execute-api.
+        - !Ref 'AWS::Region'
+        - .amazonaws.com/Prod/index.html
+  ServiceRepository:
+    Description: Service Repository
+    Value: !Ref AppSettingTable

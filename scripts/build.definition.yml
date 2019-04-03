@@ -1,0 +1,24 @@
+steps:
+
+- script: dotnet restore --configfile nuget/NuGet.Config
+  displayName: Restore Dependencies
+
+- script: dotnet build -c Release
+  displayName: Build Projects
+
+- script: dotnet publish src/Demo.OtherApi.Presentation -c Release --no-restore -o ../../buildartifacts
+  displayName: Package Application
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact - Application  
+  inputs:
+    PathtoPublish: buildartifacts
+    ArtifactName: Executable
+    publishLocation: Container
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact - Scripts  
+  inputs:
+    PathtoPublish: scripts
+    ArtifactName: Scripts
+    publishLocation: Container

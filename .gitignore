@@ -1,0 +1,22 @@
+################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/src/Demo.OtherApi.BusinessLogic/bin
+/src/Demo.OtherApi.BusinessLogic/obj
+/src/Demo.OtherApi.BusinessLogic.Core/bin
+/src/Demo.OtherApi.BusinessLogic.Core/obj
+/src/Demo.OtherApi.CrossCutting.Identity/bin
+/src/Demo.OtherApi.CrossCutting.Identity/obj
+/src/Demo.OtherApi.CrossCutting.IoC/bin
+/src/Demo.OtherApi.CrossCutting.IoC/obj
+/src/Demo.OtherApi.DataAccess.Core/bin
+/src/Demo.OtherApi.DataAccess.Core/obj
+/src/Demo.OtherApi.DataAccess.DynamoDb/bin
+/src/Demo.OtherApi.DataAccess.DynamoDb/obj
+/src/Demo.OtherApi.Presentation/bin
+/src/Demo.OtherApi.Presentation/obj
+/src/Demo.OtherApi.Util.Options/bin
+/src/Demo.OtherApi.Util.Options/obj
+
